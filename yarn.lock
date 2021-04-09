@@ -731,6 +731,11 @@
     "@types/connect" "*"
     "@types/node" "*"
 
+"@types/config@^0.0.38":
+  version "0.0.38"
+  resolved "https://registry.npm.taobao.org/@types/config/download/@types/config-0.0.38.tgz?cache=0&sync_timestamp=1613378489170&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40types%2Fconfig%2Fdownload%2F%40types%2Fconfig-0.0.38.tgz#ca30679b21b5b297299467e3a3f1c8e2e64b9170"
+  integrity sha1-yjBnmyG1spcplGfjo/HI4uZLkXA=
+
 "@types/connect@*":
   version "3.4.34"
   resolved "https://registry.npm.taobao.org/@types/connect/download/@types/connect-3.4.34.tgz#170a40223a6d666006d93ca128af2beb1d9b1901"
@@ -742,6 +747,13 @@
   version "2.1.2"
   resolved "https://registry.npm.taobao.org/@types/cookiejar/download/@types/cookiejar-2.1.2.tgz#66ad9331f63fe8a3d3d9d8c6e3906dd10f6446e8"
   integrity sha1-Zq2TMfY/6KPT2djG45Bt0Q9kRug=
+
+"@types/dotenv@^8.2.0":
+  version "8.2.0"
+  resolved "https://registry.npm.taobao.org/@types/dotenv/download/@types/dotenv-8.2.0.tgz#5cd64710c3c98e82d9d15844375a33bf1b45d053"
+  integrity sha1-XNZHEMPJjoLZ0VhEN1ozvxtF0FM=
+  dependencies:
+    dotenv "*"
 
 "@types/eslint-scope@^3.7.0":
   version "3.7.0"
@@ -1800,6 +1812,13 @@ concat-stream@^1.5.2:
     readable-stream "^2.2.2"
     typedarray "^0.0.6"
 
+config@^3.3.6:
+  version "3.3.6"
+  resolved "https://registry.npm.taobao.org/config/download/config-3.3.6.tgz#b87799db7399cc34988f55379b5f43465b1b065c"
+  integrity sha1-uHeZ23OZzDSYj1U3m19DRlsbBlw=
+  dependencies:
+    json5 "^2.1.1"
+
 consola@^2.15.0:
   version "2.15.3"
   resolved "https://registry.npm.taobao.org/consola/download/consola-2.15.3.tgz#2e11f98d6a4be71ff72e0bdf07bd23e12cb61550"
@@ -2052,6 +2071,11 @@ domexception@^2.0.1:
   integrity sha1-+0Su+6eT4VdLCvau0oAdBXUp8wQ=
   dependencies:
     webidl-conversions "^5.0.0"
+
+dotenv@*, dotenv@^8.2.0:
+  version "8.2.0"
+  resolved "https://registry.npm.taobao.org/dotenv/download/dotenv-8.2.0.tgz#97e619259ada750eea3e4ea3e26bceea5424b16a"
+  integrity sha1-l+YZJZradQ7qPk6j4mvO6lQksWo=
 
 ecc-jsbn@~0.1.1:
   version "0.1.2"
@@ -3746,7 +3770,7 @@ json-stringify-safe@~5.0.1:
   resolved "https://registry.npm.taobao.org/json-stringify-safe/download/json-stringify-safe-5.0.1.tgz#1296a2d58fd45f19a0f6ce01d65701e2c735b6eb"
   integrity sha1-Epai1Y/UXxmg9s4B1lcB4sc1tus=
 
-json5@2.x, json5@^2.1.2:
+json5@2.x, json5@^2.1.1, json5@^2.1.2:
   version "2.2.0"
   resolved "https://registry.npm.taobao.org/json5/download/json5-2.2.0.tgz#2dfefe720c6ba525d9ebd909950f0515316c89a3"
   integrity sha1-Lf7+cgxrpSXZ69kJlQ8FFTFsiaM=
