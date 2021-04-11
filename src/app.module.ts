@@ -3,11 +3,13 @@ import { ConfigModule } from 'nestjs-config';
 import { AppController } from './app.controller';
 import { resolve } from 'path';
 import { UserModule } from './modules/user/user.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.load(resolve(__dirname, 'config', '**/!(*.d).{ts,js}')),
     UserModule,
+    AuthModule,
   ],
   // TODO(rushui 2021-04-09): delete AppController if done
   controllers: [AppController],

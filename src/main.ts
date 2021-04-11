@@ -23,6 +23,10 @@ async function bootstrap() {
     .setTitle('Blog api document')
     .setDescription('My personal blog api document')
     .setVersion('1.0')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'jwt',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup(`${prefix}/${docs}`, app, document);

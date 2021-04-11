@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UserAuthEnum } from '..';
+import { IsEmail, IsString } from 'class-validator';
 
 export default class CreateUserDto {
   @ApiProperty({
@@ -8,6 +9,7 @@ export default class CreateUserDto {
     example: 'Xiaoming',
     required: true,
   })
+  @IsString()
   readonly username: string;
 
   @ApiProperty({
@@ -16,6 +18,7 @@ export default class CreateUserDto {
     example: 'user_nickname',
     required: true,
   })
+  @IsString()
   readonly nickname: string;
 
   @ApiProperty({
@@ -30,6 +33,7 @@ export default class CreateUserDto {
   @ApiProperty({
     description: 'User authorization.',
     enum: UserAuthEnum,
+    type: Number,
     required: false,
     default: () => UserAuthEnum.USER,
     example: UserAuthEnum.USER,
@@ -42,6 +46,7 @@ export default class CreateUserDto {
     maxLength: 255,
     example: '123456@163.com',
   })
+  @IsEmail()
   readonly email: string;
 
   @ApiProperty({

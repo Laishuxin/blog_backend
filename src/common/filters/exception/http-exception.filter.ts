@@ -6,7 +6,7 @@ import {
   ExceptionFilter,
   HttpException,
 } from '@nestjs/common';
-import { Response, Request } from 'express';
+import { Response } from 'express';
 import { RestFulApi, SuccessStatus } from 'src/api/restful';
 
 @Catch(HttpException)

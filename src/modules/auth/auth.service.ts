@@ -1,76 +1,78 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+/* src/modules/auth/auth.service.ts */
 
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { RestFulApi, SuccessStatus } from 'src/api/restful';
-import { User } from '../user/classes/User';
-import { UserModule } from '../user/user.module';
+import { validate } from 'src/utils/cryptogram';
+import { deleteProperties } from 'src/utils/object_property_utils';
+import { User } from '../user/class/User';
+import UserLoginDto from '../user/dto/UserLoginDto';
 import { UserService } from '../user/user.service';
-import { Payload } from './payload';
+import { Payload } from './jwt.strategy';
+export interface ServiceResponse<T = any> {
+  status: HttpStatus;
+  success: boolean;
+  data?: null | T;
+  message: string;
+}
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UserService,
-    private readonly jwtService: JwtService,
+    private readonly jwtService: JwtService, // private readonly jwtService: JwtService,
   ) {}
 
-  async validateUser(
-    username: string,
-    password: string,
-  ): Promise<RestFulApi<UserModule | null>> {
-    const user = await this.usersService.findOneByUsername(username);
+  private async validateUser(
+    userLoginDto: UserLoginDto,
+  ): Promise<ServiceResponse<User | null>> {
+    const user = await this.usersService.findOneByUsername(
+      userLoginDto.username,
+    );
     if (user === undefined) {
       return {
         status: HttpStatus.NOT_FOUND,
-        success: SuccessStatus.ERROR,
-        data: null,
-        message: 'user not fount',
+        success: false,
+        message: 'user not found',
       };
     }
 
-    // const { password: hashedPassword, password_salt } = await user;
-    // const ok = validate(password, password_salt, hashedPassword);
-    // if (ok) {
-    //   if (user.password_salt) delete user.password_salt;
-    //   if (user.password) delete user.password;
-    //   return {
-    //     status: HttpStatus.OK,
-    //     success: SuccessStatus.SUCCESS,
-    //     data: user as any, // TODO(na 2021-04-10): nark
-    //     message: 'validate user success',
-    //   };
-    // }
+    const { password: hashedPassword, password_salt } = user;
+    const ok = validate(userLoginDto.password, password_salt, hashedPassword);
+    if (!ok) {
+      return {
+        status: HttpStatus.FORBIDDEN,
+        success: false,
+        message: 'password error',
+      };
+    }
+
+    deleteProperties(user, 'password', 'password_salt');
     return {
-      status: HttpStatus.FORBIDDEN,
-      success: SuccessStatus.ERROR,
-      data: null,
-      message: 'password error',
+      status: HttpStatus.OK,
+      success: true,
+      data: user,
+      message: 'validation pass',
     };
   }
 
-  async certificate(user: User): Promise<RestFulApi> {
+  async certificate(user: User): Promise<string> {
     const payload: Payload = {
       sub: user.user_id,
       username: user.username,
       nickname: user.nickname,
       auth: user.auth,
-    };
-    console.log('jWT validating...');
-    try {
-      const token = this.jwtService.sign(payload);
-      return {
-        status: HttpStatus.OK,
-        success: SuccessStatus.SUCCESS,
-        data: { token },
-        message: 'login success',
-      };
-    } catch (err) {
-      return {
-        status: HttpStatus.UNAUTHORIZED,
-        success: SuccessStatus.ERROR,
-        data: null,
-        message: err.message,
-      };
-    }
+    } as any;
+    // console.log('jWT validating...');
+    return this.jwtService.sign(payload);
+  }
+
+  decode(token: string): Payload {
+    return this.jwtService.decode(token, {
+      json: true,
+    }) as Payload;
+  }
+
+  async login(userDto: UserLoginDto) {
+    return await this.validateUser(userDto);
   }
 }

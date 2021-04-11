@@ -1,3 +1,5 @@
+/* src/modules/user/user.controller.ts */
+
 import {
   BadRequestException,
   Body,
@@ -8,26 +10,40 @@ import {
   NotFoundException,
   Param,
   Post,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { RestFulApi, SuccessStatus } from 'src/api/restful';
-import { User, UserSchema } from './classes/User';
+import { deleteProperties } from 'src/utils/object_property_utils';
+import { UserAuthEnum } from '.';
+import { User, UserSchema } from './class/User';
 import CreateUserDto from './dto/CreateUserDto';
+import { Role } from './role.decorator';
+import { RoleGuard } from './role.guard';
 import { UserService } from './user.service';
 
-@Controller('user')
 @ApiTags('user')
+@ApiBearerAuth('jwt')
+@Controller('user')
+@UseGuards(AuthGuard('jwt'))
 export class UserController {
   constructor(private readonly usersService: UserService) {}
 
   // TODO(rushui 2021-04-11): to be not accessible
-  @Get(':username')
-  @ApiTags('get')
+  @Get('get/:username')
   @ApiParam({
     name: 'username',
     description: 'Get user information by username',
     type: String,
     example: 'Foo',
+    deprecated: true,
   })
   @ApiResponse({
     description:
@@ -46,6 +62,7 @@ export class UserController {
 
     if (result.password) delete result.password;
     if (result.password_salt) delete result.password_salt;
+    deleteProperties(result, 'password', 'password_salt');
 
     return {
       status: HttpStatus.OK,
@@ -56,13 +73,16 @@ export class UserController {
   }
 
   // TODO(rushui 2021-04-10): add api document
-  @Post('register')
-  @ApiTags('post')
   @ApiResponse({
     status: HttpStatus.OK,
-    type: UserSchema
+    type: UserSchema,
   })
-  async register(@Body() body: CreateUserDto): Promise<RestFulApi<User>> {
+  @Post('register')
+  @Role(UserAuthEnum.ADMIN)
+  @UseGuards(RoleGuard)
+  public async register(
+    @Body() body: CreateUserDto,
+  ): Promise<RestFulApi<User>> {
     // console.log(body);
     const { username, nickname, password, email } = body;
     if (!username || !nickname || !password || !email) {
@@ -87,6 +107,20 @@ export class UserController {
       success,
       data: user,
       message: result.message,
+    };
+  }
+
+  // TODO(rushui 2021-04-11): delete
+  @Get('test')
+  @ApiOperation({
+    summary: 'Testing guard',
+  })
+  test(): RestFulApi<string> {
+    return {
+      status: 200,
+      message: 'testing success',
+      data: null,
+      success: 1,
     };
   }
 }

@@ -14,7 +14,7 @@ export function makeSalt(): string {
  * @param password 密码
  * @param salt 密码盐
  */
-export function encryptPassword(password: string, salt: string): string {
+export function encrypt(password: string, salt: string): string {
   if (!password || !salt) {
     return '';
   }
@@ -37,5 +37,5 @@ export function validate(
   salt: string,
   hashedPassword: string,
 ): boolean {
-  return encryptPassword(password, salt) === hashedPassword;
+  return encrypt(password, salt) === hashedPassword;
 }
