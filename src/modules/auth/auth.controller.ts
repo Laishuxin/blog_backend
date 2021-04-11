@@ -5,6 +5,7 @@ import {
   Body,
   Controller,
   HttpException,
+  InternalServerErrorException,
   Post,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -34,7 +35,6 @@ export class AuthController {
     if (!userLoginDto.password || !userLoginDto.username) {
       throw new BadRequestException('lacks username or password');
     }
-
     const serviceResponse = await this.authService.login(userLoginDto);
     const success: boolean = serviceResponse.success;
     if (!success) {

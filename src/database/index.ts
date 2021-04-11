@@ -1,6 +1,6 @@
 import db from '../../config/database';
 import { Sequelize, QueryTypes, QueryOptionsWithType } from 'sequelize';
-import { printInfo } from 'src/utils/print_utils';
+import { printInfo } from 'src/utils/print_util';
 
 const mysqlConfig = db.mysql;
 const isProductionEnv = process.env.NODE_ENV === 'production';

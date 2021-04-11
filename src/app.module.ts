@@ -1,9 +1,11 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from 'nestjs-config';
 import { AppController } from './app.controller';
 import { resolve } from 'path';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+import appConfig from '../config/app'
 
 @Module({
   imports: [
@@ -15,4 +17,11 @@ import { AuthModule } from './modules/auth/auth.module';
   controllers: [AppController],
   providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LoggerMiddleware)
+      // .exclude(`${appConfig.prefix}/user/register`, `${appConfig.prefix}/auth/login`)
+      .forRoutes('/');
+  }
+}

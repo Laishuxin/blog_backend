@@ -8,6 +8,9 @@ import * as helmet from 'helmet';
 import * as csurf from 'csurf';
 import * as rateLimit from 'express-rate-limit';
 import { HttpExceptionFilter } from './common/filters/exception/http-exception.filter';
+import { AllExceptionsFilter } from './common/filters/exception/all-exceptions.filter';
+import * as express from 'express';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -16,7 +19,9 @@ async function bootstrap() {
   const ENV = process.env.NODE_ENV;
   const { port, addr, prefix, docs } = appConfig;
   app.setGlobalPrefix(prefix);
+  app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new TransformInterceptor());
 
   // swagger
   const options = new DocumentBuilder()
@@ -32,6 +37,9 @@ async function bootstrap() {
   SwaggerModule.setup(`${prefix}/${docs}`, app, document);
   // end swagger
 
+  // app.use(loggerMiddleware);
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
   app.use(helmet());
   // app.use(csurf());
   app.use(

@@ -15,6 +15,8 @@ import { AuthService } from '../auth/auth.service';
 })
 export class UserModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(HashPasswordMiddleware).forRoutes('user/register');
+    consumer
+      .apply(HashPasswordMiddleware)
+      .forRoutes('user/register');
   }
 }
