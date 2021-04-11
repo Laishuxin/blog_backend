@@ -1,4 +1,3 @@
-import { HttpStatus } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 
 export enum SuccessStatus {
@@ -8,30 +7,27 @@ export enum SuccessStatus {
 
 export class RestFulApi<T = any> {
   @ApiProperty({
-    description: 'http status',
-    examples: [HttpStatus.OK, HttpStatus.NOT_FOUND],
-    enum: HttpStatus,
+    description: 'Http response status',
+    example: 200,
   })
-  status: HttpStatus;
+  status: number;
 
   @ApiProperty({
-    description:
-      'The request is success or not. 0: occur some errors, 1: success',
-    type: Number,
-    examples: [0, 1],
+    description: 'Request is successful or not. 0: error, 1: success.',
+    example: 1,
   })
   success: SuccessStatus;
 
   @ApiProperty({
     description: 'Response data.',
     nullable: true,
-    example: 'null',
+    example: null,
   })
-  data: T;
+  data?: T;
 
   @ApiProperty({
     description: 'Response message.',
-    examples: ['success', 'user not found'],
+    example: 'success',
   })
   message: string;
 }

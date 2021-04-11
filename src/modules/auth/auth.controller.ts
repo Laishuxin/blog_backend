@@ -7,21 +7,27 @@ import {
   HttpException,
   Post,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RestFulApi, SuccessStatus } from 'src/api/restful';
 import { User } from '../user/class/User';
 import UserLoginDto from '../user/dto/UserLoginDto';
 import { AuthService } from './auth.service';
+import { AuthSchema } from './class/Auth';
 
 @Controller('auth')
 @ApiTags('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('login')
   @ApiOperation({
     summary: 'User login',
   })
+  @ApiResponse({
+    description: 'Return user information and token if succeed.',
+    type: AuthSchema,
+    status: 200,
+  })
+  @Post('login')
   public async userLogin(
     @Body() userLoginDto: UserLoginDto,
   ): Promise<RestFulApi<{ info: User; token: string }>> {
