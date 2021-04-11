@@ -3,7 +3,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { validate } from 'src/utils/cryptogram';
-import { deleteProperties } from 'src/utils/object_property_utils';
 import { User } from '../user/class/User';
 import UserLoginDto from '../user/dto/UserLoginDto';
 import { UserService } from '../user/user.service';
@@ -25,10 +24,10 @@ export class AuthService {
   private async validateUser(
     userLoginDto: UserLoginDto,
   ): Promise<ServiceResponse<User | null>> {
-    const user = await this.usersService.findOneByUsername(
+    const userDao = await this.usersService.findOneByUsername(
       userLoginDto.username,
     );
-    if (user === undefined) {
+    if (userDao === undefined) {
       return {
         status: HttpStatus.NOT_FOUND,
         success: false,
@@ -36,7 +35,7 @@ export class AuthService {
       };
     }
 
-    const { password: hashedPassword, password_salt } = user;
+    const { password: hashedPassword, password_salt } = userDao;
     const ok = validate(userLoginDto.password, password_salt, hashedPassword);
     if (!ok) {
       return {
@@ -46,11 +45,10 @@ export class AuthService {
       };
     }
 
-    deleteProperties(user, 'password', 'password_salt');
     return {
       status: HttpStatus.OK,
       success: true,
-      data: user,
+      data: UserService.getUser(userDao),
       message: 'validation pass',
     };
   }

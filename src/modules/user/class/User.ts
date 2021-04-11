@@ -8,19 +8,19 @@ export class User {
     description: 'User uuid',
     example: '8ad6214a-9a01-11eb-beed-005056c00001',
   })
-  public readonly user_id?: string;
+  public readonly user_id: string;
 
   @ApiProperty({
     description: 'The user create time',
     example: '2021-04-10T16:48:37.000Z',
   })
-  public readonly createAt?: string;
+  public readonly createAt: string;
 
   @ApiProperty({
     description: 'The user last update time',
     example: '2021-04-10T16:48:37.000Z',
   })
-  public readonly updateAt?: string;
+  public readonly updateAt: string;
 
   @ApiProperty({
     description: 'Username',
@@ -28,7 +28,7 @@ export class User {
     example: 'Xiaoming',
     required: true,
   })
-  public readonly username?: string;
+  public readonly username: string;
 
   @ApiProperty({
     description: 'User nickname',
@@ -36,7 +36,7 @@ export class User {
     example: 'user_nickname',
     required: true,
   })
-  public readonly nickname?: string;
+  public readonly nickname: string;
 
   @ApiProperty({
     description: 'The contact email',
@@ -44,7 +44,7 @@ export class User {
     maxLength: 255,
     example: '123456@163.com',
   })
-  public readonly email?: string;
+  public readonly email: string;
 
   @ApiProperty({
     description: 'User avatar url',
@@ -54,7 +54,7 @@ export class User {
     example:
       'https://i2.hdslb.com/bfs/face/3b1ba3d9dbdbb9c4354ef0819865a4b352a3197b.jpg@96w_96h_1c.webp',
   })
-  public readonly avatar?: string;
+  public readonly avatar: string;
 
   @ApiProperty({
     description: 'User authorization.',
@@ -63,21 +63,30 @@ export class User {
     default: () => UserAuthEnum.USER,
     example: UserAuthEnum.USER,
   })
-  public readonly auth?: UserAuthEnum;
-}
-
-export class UserDao extends User {
-  public password?: string;
-  public password_salt: string;
+  public readonly auth: UserAuthEnum;
 }
 
 export class UserSchema implements RestFulApi {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Response data.',
+  })
   data: User;
-  @ApiProperty()
+
+  @ApiProperty({
+    description: 'Http response status',
+    example: HttpStatus.OK,
+  })
   status: HttpStatus;
-  @ApiProperty()
+
+  @ApiProperty({
+    description: 'Response message.',
+    example: 'success',
+  })
   message: string;
-  @ApiProperty()
+
+  @ApiProperty({
+    description: 'Request is successful or not. 0: error, 1: success.',
+    example: 1,
+  })
   success: SuccessStatus;
 }

@@ -24,16 +24,18 @@ export class RoleGuard implements CanActivate {
       // lacks token.
       if (!token) return false;
 
+      // console.log(token);
       // here token = 'Bearer eyJhb...', and we need to extract the real token
       token = token.split(' ')[1];
       if (!token) return false;
 
       // get the auth of user
       const payload = this.authService.decode(token);
-      
-      // TODO(rushui 2021-04-11): delete
-      return payload.auth.toString() === '1'
+      // console.log(payload);
+      return payload.auth === UserAuthEnum.ADMIN;
     }
     return true;
   }
 }
+
+//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMTEyZTg2NS05YWE2LTExZWItYmVlZC0wMDUwNTZjMDAwMDEiLCJ1c2VybmFtZSI6ImFkbWluMTIzNDU2Iiwibmlja25hbWUiOiJ1c2VyX25pY2tuYW1lIiwiYXV0aCI6MSwiaWF0IjoxNjE4MTM3ODA2LCJleHAiOjE2MTgxNjY2MDZ9.VPUGWUecY-_osCFWcMJ8eeGcPRCK_nvWK3n4k01LeAI

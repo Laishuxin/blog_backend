@@ -1,9 +1,10 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { insert, query } from 'src/database';
-import { UserAuthDefault, UserFields } from '.';
-import { User, UserDao } from './class/User';
+import { UserAuthDefault } from '.';
 import CreateUserDto from './dto/CreateUserDto';
-import {UserDaoFields, } from './dao/user.dao'
+import { UserDaoFields, UserDao } from './dao/user.dao';
+import { User } from './class/User';
+
 
 export interface ServiceResponse<T = any> {
   data?: T;
@@ -21,8 +22,9 @@ export class UserService {
    * @warn password_salt should be deleted after validating.
    * @returns user_id, create_at, update_at, username, nickname, password_salt, auth, email.
    */
-  public async findOneByUsername(username: string): Promise<UserDao | undefined> {
-    
+  public async findOneByUsername(
+    username: string,
+  ): Promise<UserDao | undefined> {
     const sql = `
       SELECT ${UserDaoFields.userId}, ${UserDaoFields.createAt},
         ${UserDaoFields.updateAt}, ${UserDaoFields.username},
@@ -66,10 +68,10 @@ export class UserService {
     // Execute sql.
     const sql = `
       INSERT INTO t_user (
-        ${UserFields.userId}, ${UserFields.username},
-        ${UserFields.nickname}, ${UserFields.password},
-        ${UserFields.passwordSalt}, ${UserFields.auth},
-        ${UserFields.email}, ${UserFields.avatar}
+        ${UserDaoFields.userId}, ${UserDaoFields.username},
+        ${UserDaoFields.nickname}, ${UserDaoFields.password},
+        ${UserDaoFields.passwordSalt}, ${UserDaoFields.auth},
+        ${UserDaoFields.email}, ${UserDaoFields.avatar}
       )
       VALUES
       (UUID(), '${username}', '${nickname}', '${password}', '${password_salt}', ${auth}, '${email}', '${avatar}');
@@ -80,5 +82,18 @@ export class UserService {
     return message === null
       ? { status: HttpStatus.OK, message: 'success', success: true }
       : { status: HttpStatus.INTERNAL_SERVER_ERROR, message, success: false };
+  }
+
+  public static getUser(userDao: UserDao): User {
+    return {
+      user_id: userDao.user_id,
+      createAt: userDao.create_at,
+      updateAt: userDao.update_at,
+      username: userDao.username,
+      nickname: userDao.nickname,
+      email: userDao.email,
+      avatar: userDao.avatar,
+      auth: parseInt(userDao.auth),
+    };
   }
 }

@@ -5,17 +5,4 @@ export enum UserAuthEnum {
   OTHER = 4,
 }
 
-export enum UserFields {
-  createAt = 'create_at',
-  updateAt = 'update_at',
-  userId = 'user_id',
-  username = 'username',
-  nickname = 'nickname',
-  password = 'password',
-  passwordSalt = 'password_salt',
-  auth = 'auth',
-  email = 'email',
-  avatar = 'avatar',
-}
-
 export const UserAuthDefault = UserAuthEnum.USER;
