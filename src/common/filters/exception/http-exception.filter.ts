@@ -1,3 +1,5 @@
+/* src/common/filters/exception/HttpException.filter.ts */
+
 import {
   ArgumentsHost,
   Catch,

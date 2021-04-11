@@ -285,15 +285,117 @@ WHERE c.parent_id = 1;
 
 ### 登录/注册
 
-#### 加密
+#### 使用中间件实现加密
+
+##### 创建中间件
+
+这里先做简单的测试：
+
+```ts
+/* src/common/middlewares/hash-password.middleware.ts */
+
+import { Injectable, NestMiddleware } from '@nestjs/common';
+import { NextFunction, Request, Response } from 'express';
+
+@Injectable()
+export class HashPasswordMiddleware implements NestMiddleware {
+  use(req: Response<any>, res: Request, next: NextFunction) {
+    console.log('hello ')
+    next();
+  }
+}
+```
+
+在模块中使用中间件:
+
+```ts
+/* src/modules/user.module.ts */
+
+export class UserModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(HashPasswordMiddleware).forRoutes('user');
+  }
+}
+```
+
+##### 密码加密
+
+（这里使用`crypto`进行加密）
 
 1. 制盐：make_salt
 2. 加密：根据`salt`进行加密。
 
-##### 验证
+```ts
+/* src/utils/cryptogram.ts */
 
-1. 查询用户信息，获取`salt`
-2. 根据`password`与`salt`进行加密。判断加密后的密码是否与数据库查询到的密码相同。
+import * as crypto from 'crypto';
+
+/**
+ * Make salt
+ */
+export function makeSalt(): string {
+  return crypto.randomBytes(3).toString('base64');
+}
+
+/**
+ * Encrypt password
+ * @param password 密码
+ * @param salt 密码盐
+ */
+export function encryptPassword(password: string, salt: string): string {
+  if (!password || !salt) {
+    return '';
+  }
+  const tempSalt = Buffer.from(salt, 'base64');
+  return (
+    // 10000 代表迭代次数 16代表长度
+    crypto.pbkdf2Sync(password, tempSalt, 1000, 16, 'sha256').toString('base64')
+  );
+}
+
+/**
+ * Validate password
+ * @param password raw
+ * @param salt
+ * @param hashedPassword encrypted password
+ * @returns true if pass, else false.
+ */
+export function validate(
+  password: string,
+  salt: string,
+  hashedPassword: string,
+): boolean {
+  return encryptPassword(password, salt) === hashedPassword;
+}
+```
+
+
+
+
+
+##### 使用中间件截获用户密码
+
+从`req.body`中获取用户的密码和密码盐，然后对密码进行加密，再将密码设置回去。
+
+```ts{5-10}
+/* src/common/middlewares/hash-password.middleware.ts */
+// ...
+export class HashPasswordMiddleware implements NestMiddleware {
+  use(req: Request, res: Response, next: NextFunction) {
+    const body: CreateUserDto = req.body;
+    // User may want to find the password he forgot,
+    // so if password not passed, skip to encrypt.
+    const salt = body.password_salt ? body.password_salt : makeSalt();
+    body.password = encryptPassword(body.password, salt);
+    body.password_salt = salt;
+
+    next();
+  }
+}
+
+```
+
+
 
 #### token验证
 
@@ -311,6 +413,60 @@ yarn add  passport-local --dev
 ### 日志系统
 
 ### 异常处理
+
+1. 创建异常处理过滤器
+
+   ```ts
+   /* src/common/filters/exception/HttpException.filter.ts */
+   
+   import {
+     ArgumentsHost,
+     Catch,
+     ExceptionFilter,
+     HttpException,
+   } from '@nestjs/common';
+   import { Response, Request } from 'express';
+   import { RestFulApi, SuccessStatus } from 'src/api/restful';
+   
+   @Catch(HttpException)
+   export class HttpExceptionFilter implements ExceptionFilter<HttpException> {
+     catch(exception: HttpException, host: ArgumentsHost) {
+       const ctx = host.switchToHttp();
+       const response: Response = ctx.getResponse();
+       const status = exception.getStatus();
+   
+       const responseJson: RestFulApi = {
+         status,
+         data: null,
+         message: exception.message,
+         success: SuccessStatus.ERROR,
+       };
+       response.json(responseJson);
+     }
+   }
+   ```
+
+2. 注册为全局过滤器
+
+   ```ts
+   /* src/main.ts */
+   // ...
+   app.useGlobalFilters(new HttpExceptionFilter());
+   ```
+
+3. 自动捕获
+
+   ```ts
+   // xxx.ts
+   throw new HttpException(/* ... */)
+   throw new BadRequestException(/* ... */)
+   ```
+
+   
+
+
+
+
 
 ### API文档--swagger
 

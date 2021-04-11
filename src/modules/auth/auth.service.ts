@@ -2,7 +2,6 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 
 import { JwtService } from '@nestjs/jwt';
 import { RestFulApi, SuccessStatus } from 'src/api/restful';
-import { validate } from 'src/utils/cryptogram';
 import { User } from '../user/classes/User';
 import { UserModule } from '../user/user.module';
 import { UserService } from '../user/user.service';
@@ -29,18 +28,18 @@ export class AuthService {
       };
     }
 
-    const { password: hashedPassword, password_salt } = await user;
-    const ok = validate(password, password_salt, hashedPassword);
-    if (ok) {
-      if (user.password_salt) delete user.password_salt;
-      if (user.password) delete user.password;
-      return {
-        status: HttpStatus.OK,
-        success: SuccessStatus.SUCCESS,
-        data: user,
-        message: 'validate user success',
-      };
-    }
+    // const { password: hashedPassword, password_salt } = await user;
+    // const ok = validate(password, password_salt, hashedPassword);
+    // if (ok) {
+    //   if (user.password_salt) delete user.password_salt;
+    //   if (user.password) delete user.password;
+    //   return {
+    //     status: HttpStatus.OK,
+    //     success: SuccessStatus.SUCCESS,
+    //     data: user as any, // TODO(na 2021-04-10): nark
+    //     message: 'validate user success',
+    //   };
+    // }
     return {
       status: HttpStatus.FORBIDDEN,
       success: SuccessStatus.ERROR,
@@ -51,7 +50,7 @@ export class AuthService {
 
   async certificate(user: User): Promise<RestFulApi> {
     const payload: Payload = {
-      sub: user.userId,
+      sub: user.user_id,
       username: user.username,
       nickname: user.nickname,
       auth: user.auth,
