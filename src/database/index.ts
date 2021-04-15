@@ -1,6 +1,5 @@
 import db from '../../config/database';
 import { Sequelize, QueryTypes, QueryOptionsWithType } from 'sequelize';
-import { printInfo } from 'src/utils/print_utils';
 
 const mysqlConfig = db.mysql;
 const isProductionEnv = process.env.NODE_ENV === 'production';
@@ -28,12 +27,12 @@ sequelize
   .authenticate()
   .then(() => {
     if (!isProductionEnv) {
-      printInfo(`[db]: connected ${mysqlConfig.database} successfully`);
+      console.log(`[db]: connected ${mysqlConfig.database} successfully`);
     }
   })
   .catch((err) => {
     if (!isProductionEnv) {
-      printInfo(
+      console.log(
         `[db]: connected ${mysqlConfig.database} occurs error with ${err.message}`,
       );
     }

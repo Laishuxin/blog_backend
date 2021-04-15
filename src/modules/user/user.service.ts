@@ -5,7 +5,6 @@ import CreateUserDto from './dto/CreateUserDto';
 import { UserDaoFields, UserDao } from './dao/user.dao';
 import { User } from './class/User';
 
-
 export interface ServiceResponse<T = any> {
   data?: T;
   status: HttpStatus;
@@ -15,7 +14,6 @@ export interface ServiceResponse<T = any> {
 
 @Injectable()
 export class UserService {
-  // TODO(rushui 2021-04-11): to be private method
   /**
    * Find one user by indicating username
    * @param username user name
@@ -34,7 +32,7 @@ export class UserService {
       WHERE ${UserDaoFields.username} = '${username}'
     `;
 
-    let result = await query<UserDao>(sql);
+    let result = await query<UserDao>(sql, {logging: false});
     return result.length !== 0
       ? Promise.resolve(result[0])
       : Promise.resolve(undefined);
@@ -77,8 +75,9 @@ export class UserService {
       (UUID(), '${username}', '${nickname}', '${password}', '${password_salt}', ${auth}, '${email}', '${avatar}');
     `;
 
-    // TODO(rushui 2021-04-10): close logging
-    const message = await insert(sql, { logging: true });
+    const message = await insert(sql, {
+      logging: process.env.NODE_ENV !== 'production',
+    });
     return message === null
       ? { status: HttpStatus.OK, message: 'success', success: true }
       : { status: HttpStatus.INTERNAL_SERVER_ERROR, message, success: false };

@@ -45,6 +45,7 @@ export class AuthController {
     }
 
     const user = serviceResponse.data;
+
     return {
       status: serviceResponse.status,
       success: SuccessStatus.SUCCESS,

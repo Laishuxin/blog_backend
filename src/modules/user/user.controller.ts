@@ -81,8 +81,6 @@ export class UserController {
     };
   }
 
-  // TODO(rushui 2021-04-10): add api document
-  
   @ApiOperation({
     summary: 'User register by admin.',
   })
