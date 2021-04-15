@@ -3,21 +3,25 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import appConfig from '../config/app';
+import { config as dotenvConfig } from 'dotenv';
+dotenvConfig();
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as helmet from 'helmet';
-import * as csurf from 'csurf';
 import * as rateLimit from 'express-rate-limit';
-import { HttpExceptionFilter } from './common/filters/exception/http-exception.filter';
 import * as express from 'express';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { HttpExceptionFilter } from './common/filters/exception/http-exception.filter';
+import { AllExceptionsFilter } from './common/filters/exception/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: true, // allow access origin
   });
-  const ENV = process.env.NODE_ENV;
   const { port, addr, prefix, docs } = appConfig;
   app.setGlobalPrefix(prefix);
-  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new TransformInterceptor());
+  app.useGlobalFilters(new AllExceptionsFilter(), new HttpExceptionFilter());
+  // app.useGlobalFilters(new HttpExceptionFilter(), new AllExceptionsFilter());
 
   // swagger
   const options = new DocumentBuilder()
@@ -30,9 +34,10 @@ async function bootstrap() {
     )
     .build();
   const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup(`${prefix}/${docs}`, app, document);
+  SwaggerModule.setup(`${docs}`, app, document);
   // end swagger
 
+  // middlewares
   app.use(helmet());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
@@ -43,14 +48,13 @@ async function bootstrap() {
       max: 100, // limit each IP to 100 requests per windowMs
     }),
   );
+  // end middlewares
 
   await app.listen(port, addr, () => {
-    if (ENV !== 'production') {
-      console.log(`server is running at http://${addr}:${port}${prefix}`);
-      console.log(
-        `document server is running at http://${addr}:${port}${prefix}/${docs}`,
-      );
-    }
+    console.log(`server is running at http://${addr}:${port}${prefix}`);
+    console.log(
+      `document server is running at http://${addr}:${port}${docs}`,
+    );
   });
 }
 bootstrap();

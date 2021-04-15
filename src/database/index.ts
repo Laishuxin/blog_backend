@@ -1,8 +1,11 @@
 import db from '../../config/database';
 import { Sequelize, QueryTypes, QueryOptionsWithType } from 'sequelize';
+import { getLogger } from 'src/utils/logger';
+import { loggingDb } from 'src/utils/logging_util';
 
 const mysqlConfig = db.mysql;
 const isProductionEnv = process.env.NODE_ENV === 'production';
+const dbLogger = getLogger('database');
 
 const sequelize = new Sequelize(
   mysqlConfig.database,
@@ -13,6 +16,7 @@ const sequelize = new Sequelize(
     port: mysqlConfig.port,
     host: mysqlConfig.host,
     logging: console.log,
+    // logQueryParameters: false,
     pool: {
       min: 0,
       max: mysqlConfig.connectionLimit,
@@ -29,6 +33,17 @@ sequelize
     if (!isProductionEnv) {
       console.log(`[db]: connected ${mysqlConfig.database} successfully`);
     }
+    loggingDb(
+      {
+        type: 'mysql',
+        database: mysqlConfig.database,
+        username: mysqlConfig.username,
+      },
+      {
+        level: 'info',
+        logger: dbLogger,
+      },
+    );
   })
   .catch((err) => {
     if (!isProductionEnv) {
@@ -36,12 +51,23 @@ sequelize
         `[db]: connected ${mysqlConfig.database} occurs error with ${err.message}`,
       );
     }
+    loggingDb(
+      {
+        type: 'mysql',
+        database: mysqlConfig.database,
+        username: mysqlConfig.username,
+      },
+      {
+        level: 'error',
+        logger: dbLogger,
+      },
+    );
     throw err;
   });
 
 export async function query<T = any>(
   sql: string,
-  { logging = true, raw = true } = {},
+  { logging = false, raw = true } = {},
 ): Promise<T[]> {
   try {
     const result = (await sequelize.query(sql, {
@@ -70,7 +96,7 @@ export async function insert(
       type: QueryTypes.INSERT,
       logging,
     });
-    return Promise.resolve(null)
+    return Promise.resolve(null);
   } catch (err) {
     return Promise.reject(
       err.message && err.message !== '' ? err.message : 'service error',
