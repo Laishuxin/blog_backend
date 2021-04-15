@@ -1,10 +1,10 @@
 /* src/main.ts */
 
+import { config as dotenvConfig } from 'dotenv';
+dotenvConfig();
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import appConfig from '../config/app';
-import { config as dotenvConfig } from 'dotenv';
-dotenvConfig();
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as helmet from 'helmet';
 import * as rateLimit from 'express-rate-limit';
@@ -52,9 +52,7 @@ async function bootstrap() {
 
   await app.listen(port, addr, () => {
     console.log(`server is running at http://${addr}:${port}${prefix}`);
-    console.log(
-      `document server is running at http://${addr}:${port}${docs}`,
-    );
+    console.log(`document server is running at http://${addr}:${port}${docs}`);
   });
 }
 bootstrap();

@@ -7,4 +7,12 @@ export class AppController {
   welcome() {
     return 'welcome';
   }
+
+  @Get('test')
+  greeting() {
+    return {
+      name: 'greeting',
+      type: 'testing',
+    };
+  }
 }
