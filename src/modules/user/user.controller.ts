@@ -6,7 +6,6 @@ import {
   Controller,
   Get,
   HttpStatus,
-  InternalServerErrorException,
   NotFoundException,
   Param,
   Post,
@@ -107,7 +106,7 @@ export class UserController {
         : SuccessStatus.ERROR;
 
     if (success === SuccessStatus.ERROR)
-      throw new InternalServerErrorException(result.message);
+      throw new BadRequestException(result.message);
 
     const user = UserService.getUser(
       await this.usersService.findOneByUsername(username),

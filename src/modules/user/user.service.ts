@@ -41,7 +41,6 @@ export class UserService {
   /**
    * User register.
    * @param userDto Create user dto.
-   * @returns Ok or INTERNAL_SERVER_ERROR
    */
   public async createUser(userDto: CreateUserDto): Promise<ServiceResponse> {
     let {
@@ -80,7 +79,7 @@ export class UserService {
     });
     return message === null
       ? { status: HttpStatus.OK, message: 'success', success: true }
-      : { status: HttpStatus.INTERNAL_SERVER_ERROR, message, success: false };
+      : { status: HttpStatus.BAD_REQUEST, message, success: false };
   }
 
   public static getUser(userDao: UserDao): User {
