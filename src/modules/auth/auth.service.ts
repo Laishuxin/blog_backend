@@ -3,6 +3,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { validate } from 'src/utils/cryptogram';
+import { IServiceResponse, ServiceCode } from '..';
 import { User } from '../user/class/User';
 import UserLoginDto from '../user/dto/UserLoginDto';
 import { UserService } from '../user/user.service';
@@ -23,15 +24,14 @@ export class AuthService {
 
   private async validateUser(
     userLoginDto: UserLoginDto,
-  ): Promise<ServiceResponse<User | null>> {
+  ): Promise<IServiceResponse<User | null>> {
     const userDao = await this.usersService.findOneByUsername(
       userLoginDto.username,
     );
     if (userDao === undefined) {
       return {
-        status: HttpStatus.NOT_FOUND,
-        success: false,
-        message: 'user not found',
+        code: ServiceCode.BAD_REQUEST,
+        message: 'User not found',
       };
     }
 
@@ -39,17 +39,15 @@ export class AuthService {
     const ok = validate(userLoginDto.password, password_salt, hashedPassword);
     if (!ok) {
       return {
-        status: HttpStatus.FORBIDDEN,
-        success: false,
-        message: 'password error',
+        code: ServiceCode.BAD_REQUEST,
+        message: 'Password error',
       };
     }
 
     return {
-      status: HttpStatus.OK,
-      success: true,
+      code: ServiceCode.SUCCESS,
       data: UserService.getUser(userDao),
-      message: 'validation pass',
+      message: 'Success',
     };
   }
 
@@ -72,5 +70,16 @@ export class AuthService {
 
   async login(userDto: UserLoginDto) {
     return await this.validateUser(userDto);
+  }
+
+  public static getStatusByServiceCode(code: ServiceCode): HttpStatus {
+    switch (code) {
+      case ServiceCode.BAD_REQUEST:
+        return HttpStatus.BAD_REQUEST;
+      case ServiceCode.SERVER_ERROR:
+        return HttpStatus.INTERNAL_SERVER_ERROR;
+      default:
+        return HttpStatus.OK;
+    }
   }
 }

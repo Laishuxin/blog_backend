@@ -13,7 +13,6 @@ import {
 import {
   loggingRequest,
   loggingResponse,
-  loggingResponseDataWithRequest,
 } from '../../utils/logging_util';
 import { getLogger } from 'src/utils/logger';
 

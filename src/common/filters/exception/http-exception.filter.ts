@@ -7,16 +7,11 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { RestFulApi, SuccessStatus } from 'src/api/restful';
-import {
-  loggingRequest,
-  loggingResponseDataWithRequest,
-} from 'src/utils/logging_util';
+import { loggingRequest } from 'src/utils/logging_util';
 import { getLogger } from '../../../utils/logger';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter<HttpException> {
-  private static readonly responseLogger = getLogger('httpResponse');
   private static readonly requestLogger = getLogger('httpRequest');
   private static readonly errorLogger = getLogger('error');
 
@@ -24,7 +19,12 @@ export class HttpExceptionFilter implements ExceptionFilter<HttpException> {
     const ctx = host.switchToHttp();
     const response: Response = ctx.getResponse();
     const request: Request = ctx.getRequest();
-    const status = exception.getStatus();
+    let status = exception.getStatus();
+    let message = exception.message;
+    if (status < 100) {
+      message = 'server error';
+      status = 500;
+    }
 
     if (status < 500) {
       loggingRequest(request, {
@@ -40,12 +40,9 @@ export class HttpExceptionFilter implements ExceptionFilter<HttpException> {
       });
     }
 
-    const responseJson: RestFulApi = {
-      status,
-      data: null,
-      message: exception.message,
-      success: SuccessStatus.ERROR,
+    const responseJson = {
+      message,
     };
-    response.json(responseJson);
+    response.status(status).json(responseJson);
   }
 }

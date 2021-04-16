@@ -5,10 +5,12 @@ import {
   Body,
   Controller,
   Get,
+  HttpException,
   HttpStatus,
   NotFoundException,
   Param,
   Post,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -20,9 +22,10 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { RestFulApi, SuccessStatus } from 'src/api/restful';
+import { Response } from 'express';
 import { UserAuthEnum } from '.';
-import { User, UserSchema } from './class/User';
+import { ServiceCode } from '..';
+import { User } from './class/User';
 import CreateUserDto from './dto/CreateUserDto';
 import { Role } from './role.decorator';
 import { RoleGuard } from './role.guard';
@@ -34,8 +37,7 @@ import { UserService } from './user.service';
   name: 'Authorization',
   description: 'Token',
   required: true,
-  example:
-    'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMTEyZTg2NS05YWE2LTExZWItYmVlZC0wMDUwNTZjMDAwMDEiLCJ1c2VybmFtZSI6ImFkbWluMTIzNDU2Iiwibmlja25hbWUiOiJ1c2VyX25pY2tuYW1lIiwiYXV0aCI6MSwiaWF0IjoxNjE4MTM3ODA2LCJleHAiOjE2MTgxNjY2MDZ9.VPUGWUecY-_osCFWcMJ8eeGcPRCK_nvWK3n4k01LeAI',
+  example: 'Bearer eyJhbGciOiJIxxxxxx',
 })
 @Controller('user')
 @UseGuards(AuthGuard('jwt'))
@@ -50,34 +52,19 @@ export class UserController {
     name: 'username',
     type: String,
   })
-  @ApiResponse({
-    description: 'User not found.',
-    status: 404,
-    type: RestFulApi,
-  })
-  @ApiResponse({
-    description: 'Lacks token.',
-    status: 403,
-    type: RestFulApi,
-  })
   @Get('get/:username')
   @Role(UserAuthEnum.ADMIN)
   @UseGuards(RoleGuard)
   async getUserByUsername(
     @Param('username') username: string,
-  ): Promise<RestFulApi<User | null>> {
+  ): Promise<User | null> {
     const result = await this.usersService.findOneByUsername(username);
     if (result === undefined) {
       throw new NotFoundException({ message: 'user not found' });
     }
 
     const user = UserService.getUser(result);
-    return {
-      status: HttpStatus.OK,
-      success: SuccessStatus.SUCCESS,
-      data: user,
-      message: 'success',
-    };
+    return user;
   }
 
   @ApiOperation({
@@ -85,38 +72,34 @@ export class UserController {
   })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: UserSchema,
+    type: User,
   })
   @Post('register')
   @Role(UserAuthEnum.ADMIN)
   @UseGuards(RoleGuard)
-  public async register(
+  public async create(
     @Body() body: CreateUserDto,
-  ): Promise<RestFulApi<User>> {
+    @Res() res: Response<User>,
+  ): Promise<User> {
     // console.log(body);
     const { username, nickname, password, email } = body;
     if (!username || !nickname || !password || !email) {
       throw new BadRequestException('parameter error');
     }
 
-    const result = await this.usersService.createUser(body);
-    const success =
-      result.status >= 200 && result.status < 300
-        ? SuccessStatus.SUCCESS
-        : SuccessStatus.ERROR;
+    const { code, message } = await this.usersService.create(body);
 
-    if (success === SuccessStatus.ERROR)
-      throw new BadRequestException(result.message);
+    const status = UserService.getStatusByServiceCode(code);
+
+    if (code !== ServiceCode.SUCCESS) {
+      throw new HttpException(message, status);
+    }
 
     const user = UserService.getUser(
       await this.usersService.findOneByUsername(username),
     );
 
-    return {
-      status: result.status,
-      success,
-      data: user,
-      message: result.message,
-    };
+    res.status(status).json(user);
+    return user;
   }
 }

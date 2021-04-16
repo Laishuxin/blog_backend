@@ -4,13 +4,7 @@ import { UserAuthDefault } from '.';
 import CreateUserDto from './dto/CreateUserDto';
 import { UserDaoFields, UserDao } from './dao/user.dao';
 import { User } from './class/User';
-
-export interface ServiceResponse<T = any> {
-  data?: T;
-  status: HttpStatus;
-  message: string;
-  success: boolean;
-}
+import { ServiceCode, IServiceResponse } from '..';
 
 @Injectable()
 export class UserService {
@@ -27,12 +21,13 @@ export class UserService {
       SELECT ${UserDaoFields.userId}, ${UserDaoFields.createAt},
         ${UserDaoFields.updateAt}, ${UserDaoFields.username},
         ${UserDaoFields.nickname}, ${UserDaoFields.passwordSalt},
-        ${UserDaoFields.auth}, ${UserDaoFields.email}, ${UserDaoFields.password}
+        ${UserDaoFields.auth}, ${UserDaoFields.email}, 
+        ${UserDaoFields.password}, ${UserDaoFields.avatar}
       FROM t_user 
       WHERE ${UserDaoFields.username} = '${username}'
     `;
 
-    let result = await query<UserDao>(sql, {logging: false});
+    let result = await query<UserDao>(sql, { logging: false });
     return result.length !== 0
       ? Promise.resolve(result[0])
       : Promise.resolve(undefined);
@@ -42,7 +37,7 @@ export class UserService {
    * User register.
    * @param userDto Create user dto.
    */
-  public async createUser(userDto: CreateUserDto): Promise<ServiceResponse> {
+  public async create(userDto: CreateUserDto): Promise<IServiceResponse> {
     let {
       username,
       nickname,
@@ -57,9 +52,8 @@ export class UserService {
     const user = await this.findOneByUsername(username);
     if (user)
       return {
-        status: HttpStatus.BAD_REQUEST,
         message: 'user exists',
-        success: false,
+        code: ServiceCode.BAD_REQUEST,
       };
 
     // Execute sql.
@@ -75,14 +69,15 @@ export class UserService {
     `;
 
     const message = await insert(sql, {
-      logging: process.env.NODE_ENV !== 'production',
+      logging: false,
     });
     return message === null
-      ? { status: HttpStatus.OK, message: 'success', success: true }
-      : { status: HttpStatus.BAD_REQUEST, message, success: false };
+      ? { message: 'success', code: ServiceCode.SUCCESS }
+      : { message, code: ServiceCode.SERVER_ERROR };
   }
 
   public static getUser(userDao: UserDao): User {
+    console.log(userDao)
     return {
       user_id: userDao.user_id,
       createAt: userDao.create_at,
@@ -94,4 +89,15 @@ export class UserService {
       auth: parseInt(userDao.auth),
     };
   }
+
+  public static getStatusByServiceCode = (code: ServiceCode): HttpStatus => {
+    switch (code) {
+      case ServiceCode.BAD_REQUEST:
+        return HttpStatus.BAD_REQUEST;
+      case ServiceCode.SERVER_ERROR:
+        return HttpStatus.INTERNAL_SERVER_ERROR;
+      default:
+        return HttpStatus.OK;
+    }
+  };
 }

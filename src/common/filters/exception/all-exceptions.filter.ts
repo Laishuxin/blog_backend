@@ -6,7 +6,6 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { getLogger } from '../../../utils/logger';
-import { RestFulApi } from 'src/api/restful';
 import { loggingResponse } from 'src/utils/logging_util';
 import { Request, Response } from 'express';
 
@@ -18,10 +17,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const res: Response = ctx.getResponse();
     const req: Request = ctx.getRequest();
 
-    const status =
+    let status =
       exception instanceof HttpException
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
+
+    let message: string = 'Client error';
+    if (status < 100) {
+      message = 'Server error';
+      status = 500;
+    }
+
     loggingResponse(req, res, {
       level: 'error',
       logger: AllExceptionsFilter.errorLogger,
@@ -29,11 +35,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
       hiddenFields: ['password', 'token'],
     });
 
+    // console.log('all exception status: ', status)
     res.status(status).json({
-      status,
-      message: status < 500 ? 'client error' : 'server error',
-      success: 0,
-      data: null,
-    } as RestFulApi);
+      message
+    });
   }
 }

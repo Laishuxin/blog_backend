@@ -1,6 +1,4 @@
-import { HttpStatus } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import { RestFulApi, SuccessStatus } from 'src/api/restful';
 import { UserAuthEnum } from '..';
 
 export class User {
@@ -58,35 +56,19 @@ export class User {
 
   @ApiProperty({
     description: 'User authorization.',
-    enum: UserAuthEnum,
+    // enum: UserAuthEnum,
     required: false,
     default: () => UserAuthEnum.USER,
     example: UserAuthEnum.USER,
+    type: Number,
   })
   public readonly auth: UserAuthEnum;
 }
 
-export class UserSchema implements RestFulApi {
-  @ApiProperty({
-    description: 'Response data.',
-  })
+export class UserSchema {
+  @ApiProperty()
   data: User;
 
-  @ApiProperty({
-    description: 'Http response status',
-    example: HttpStatus.OK,
-  })
-  status: HttpStatus;
-
-  @ApiProperty({
-    description: 'Response message.',
-    example: 'success',
-  })
-  message: string;
-
-  @ApiProperty({
-    description: 'Request is successful or not. 0: error, 1: success.',
-    example: 1,
-  })
-  success: SuccessStatus;
+  @ApiProperty()
+  token: string;
 }

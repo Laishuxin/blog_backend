@@ -6,13 +6,14 @@ import {
   Controller,
   HttpException,
   Post,
+  Res,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { RestFulApi, SuccessStatus } from 'src/api/restful';
-import { User } from '../user/class/User';
+import { Response } from 'express';
+import { ServiceCode } from '..';
+import { User, UserSchema } from '../user/class/User';
 import UserLoginDto from '../user/dto/UserLoginDto';
 import { AuthService } from './auth.service';
-import { AuthSchema } from './class/Auth';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -23,37 +24,32 @@ export class AuthController {
     summary: 'User login',
   })
   @ApiResponse({
-    description: 'Return user information and token if succeed.',
-    type: AuthSchema,
+    description: 'Return user information and token.',
     status: 200,
+    type: UserSchema
   })
   @Post('login')
   public async userLogin(
     @Body() userLoginDto: UserLoginDto,
-  ): Promise<RestFulApi<{ info: User; token: string }>> {
+    @Res() req: Response<{ data: User; token: string }>,
+  ): Promise<User> {
     if (!userLoginDto.password || !userLoginDto.username) {
-      throw new BadRequestException('lacks username or password');
+      throw new BadRequestException('username or password require');
     }
 
-    const serviceResponse = await this.authService.login(userLoginDto);
-    const success: boolean = serviceResponse.success;
-    if (!success) {
-      throw new HttpException(
-        { message: serviceResponse.message },
-        serviceResponse.status,
-      );
+    // TODO delete
+    const { code, message, data = null } = await this.authService.login(
+      userLoginDto,
+    );
+    const status = AuthService.getStatusByServiceCode(code);
+    if (code !== ServiceCode.SUCCESS) {
+      throw new HttpException(message, status);
     }
 
-    const user = serviceResponse.data;
-
-    return {
-      status: serviceResponse.status,
-      success: SuccessStatus.SUCCESS,
-      message: serviceResponse.message,
-      data: {
-        info: user,
-        token: await this.authService.certificate(user),
-      },
-    };
+    req.status(status).json({
+      data,
+      token: await this.authService.certificate(data),
+    });
+    return data;
   }
 }
