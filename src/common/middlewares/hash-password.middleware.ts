@@ -3,7 +3,7 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
 import CreateUserDto from 'src/modules/user/dto/CreateUserDto';
-import { encrypt, makeSalt } from 'src/utils/cryptogram';
+import { encryptPwd, makeSalt } from 'src/utils/crypto_util';
 
 @Injectable()
 export class HashPasswordMiddleware implements NestMiddleware {
@@ -12,7 +12,7 @@ export class HashPasswordMiddleware implements NestMiddleware {
     // User may want to find the password he forgot,
     // so if password not passed, skip to encrypt.
     const salt = body.password_salt ? body.password_salt : makeSalt();
-    body.password = encrypt(body.password, salt);
+    body.password = encryptPwd(body.password, salt);
     body.password_salt = salt;
 
     next();

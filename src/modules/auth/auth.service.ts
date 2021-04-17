@@ -2,7 +2,7 @@
 
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { validate } from 'src/utils/cryptogram';
+import { validate } from 'src/utils/crypto_util';
 import { IServiceResponse, ServiceCode } from '..';
 import { User } from '../user/class/User';
 import UserLoginDto from '../user/dto/UserLoginDto';
@@ -30,7 +30,7 @@ export class AuthService {
     );
     if (userDao === undefined) {
       return {
-        code: ServiceCode.BAD_REQUEST,
+        code: ServiceCode.UNAUTHORIZED,
         message: 'User not found',
       };
     }
@@ -76,6 +76,8 @@ export class AuthService {
     switch (code) {
       case ServiceCode.BAD_REQUEST:
         return HttpStatus.BAD_REQUEST;
+      case ServiceCode.UNAUTHORIZED:
+        return HttpStatus.UNAUTHORIZED;
       case ServiceCode.SERVER_ERROR:
         return HttpStatus.INTERNAL_SERVER_ERROR;
       default:

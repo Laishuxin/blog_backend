@@ -7,7 +7,6 @@ const dbMysqlPassword = process.env.DB_MYSQL_PASSWORD;
 const dbMysqlLimit = parseInt(process.env.DB_MYSQL_LIMIT) || 10;
 const dbMysqlDatabase = process.env.DB_MYSQL_DATABASE;
 
-// TODO(rushui 2021-04-09): read config for dotenv
 export interface DBConfig {
   port: number;
   host: string;

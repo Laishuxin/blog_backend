@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
+import { decrypt } from 'src/utils/crypto_util';
 import { ServiceCode } from '..';
 import { User, UserSchema } from '../user/class/User';
 import UserLoginDto from '../user/dto/UserLoginDto';
@@ -37,9 +38,8 @@ export class AuthController {
       throw new BadRequestException('username or password require');
     }
 
-    // TODO delete
     const { code, message, data = null } = await this.authService.login(
-      userLoginDto,
+      {username: userLoginDto.username, password: decrypt(userLoginDto.password)},
     );
     const status = AuthService.getStatusByServiceCode(code);
     if (code !== ServiceCode.SUCCESS) {
