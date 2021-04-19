@@ -1,5 +1,4 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
@@ -26,13 +25,11 @@ export class RoleGuard implements CanActivate {
 
       // console.log(token);
       // here token = 'Bearer eyJhb...', and we need to extract the real token
-      token = token.split(' ')[1];
+      token = this.authService.extractToken(token)
       if (!token) return false;
 
-      // get the auth of user
-      const payload = this.authService.decode(token);
       // console.log(payload);
-      return payload.auth === UserAuthEnum.ADMIN;
+      return this.authService.validateAuth(role, token)
     }
     return true;
   }

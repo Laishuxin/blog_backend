@@ -23,7 +23,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
     let message: string = 'Client error';
-    if (status < 100) {
+    if (status < 100 || status >= 500) {
       message = 'Server error';
       status = 500;
     }

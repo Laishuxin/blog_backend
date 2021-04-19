@@ -6,7 +6,7 @@ export class User {
     description: 'User uuid',
     example: '8ad6214a-9a01-11eb-beed-005056c00001',
   })
-  public readonly user_id: string;
+  public readonly userId: string;
 
   @ApiProperty({
     description: 'The user create time',

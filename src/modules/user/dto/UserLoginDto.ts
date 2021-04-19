@@ -10,11 +10,11 @@ export default class UserLoginDto {
   readonly username: string;
 
   @ApiProperty({
-    description: 'User account password',
+    description: 'User encrypted password',
     minLength: 6,
     maxLength: 32,
     required: true,
-    example: 'userPassword',
+    example: 'U2FsdGVkX19zc3PzPGowl13j2ama6q0bgzJhNOajT1U=',
   })
   readonly password: string;
 }

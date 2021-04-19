@@ -1,10 +1,11 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { insert, query } from 'src/database';
 import { UserAuthDefault } from '.';
 import CreateUserDto from './dto/CreateUserDto';
 import { UserDaoFields, UserDao } from './dao/user.dao';
 import { User } from './class/User';
 import { ServiceCode, IServiceResponse } from '..';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class UserService {
@@ -31,6 +32,35 @@ export class UserService {
     return result.length !== 0
       ? Promise.resolve(result[0])
       : Promise.resolve(undefined);
+  }
+
+  public async findOneByUserId(
+    userId: string,
+  ): Promise<IServiceResponse<UserDao | undefined>> {
+    const sql = `
+      SELECT ${UserDaoFields.userId}, ${UserDaoFields.createAt},
+        ${UserDaoFields.updateAt}, ${UserDaoFields.username},
+        ${UserDaoFields.nickname}, ${UserDaoFields.passwordSalt},
+        ${UserDaoFields.auth}, ${UserDaoFields.email}, 
+        ${UserDaoFields.password}, ${UserDaoFields.avatar}
+      FROM t_user 
+      WHERE ${UserDaoFields.userId} = '${userId}'
+    `;
+    let result = await query<UserDao>(sql);
+    let code: ServiceCode = ServiceCode.BAD_REQUEST;
+    let message: string = 'user id error';
+    let data: UserDao | undefined;
+    if (result.length !== 0) {
+      code = ServiceCode.SUCCESS;
+      message = 'success';
+      data = result[0];
+    }
+
+    return {
+      code,
+      data,
+      message,
+    };
   }
 
   /**
@@ -77,9 +107,9 @@ export class UserService {
   }
 
   public static getUser(userDao: UserDao): User {
-    console.log(userDao)
+    console.log(userDao);
     return {
-      user_id: userDao.user_id,
+      userId: userDao.user_id,
       createAt: userDao.create_at,
       updateAt: userDao.update_at,
       username: userDao.username,

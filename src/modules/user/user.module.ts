@@ -1,7 +1,6 @@
 /* src/modules/user.module.ts */
 
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { HashPasswordMiddleware } from 'src/common/middlewares/hash-password.middleware';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';

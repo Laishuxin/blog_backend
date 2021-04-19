@@ -7,14 +7,16 @@ import {
   HttpException,
   Post,
   Res,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { decrypt } from 'src/utils/crypto_util';
 import { ServiceCode } from '..';
 import { User, UserSchema } from '../user/class/User';
 import UserLoginDto from '../user/dto/UserLoginDto';
 import { AuthService } from './auth.service';
+import ValidateTokenDto from './dto/ValidateTokenDto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -27,7 +29,7 @@ export class AuthController {
   @ApiResponse({
     description: 'Return user information and token.',
     status: 200,
-    type: UserSchema
+    type: UserSchema,
   })
   @Post('login')
   public async userLogin(
@@ -39,7 +41,11 @@ export class AuthController {
     }
 
     const { code, message, data = null } = await this.authService.login(
-      {username: userLoginDto.username, password: decrypt(userLoginDto.password)},
+      {
+        username: userLoginDto.username,
+        password: decrypt(userLoginDto.password),
+      },
+      // { username: userLoginDto.username, password: userLoginDto.password },
     );
     const status = AuthService.getStatusByServiceCode(code);
     if (code !== ServiceCode.SUCCESS) {
@@ -51,5 +57,24 @@ export class AuthController {
       token: await this.authService.certificate(data),
     });
     return data;
+  }
+
+  @ApiOperation({
+    summary: 'Validate token.',
+  })
+  @ApiBody({
+    required: true,
+    type: ValidateTokenDto,
+  })
+  @Post('validate')
+  public async validateToken(
+    @Body('token') token: string,
+  ): Promise<User | null> {
+    // token = this.authService.extractToken(token);
+    if (!token) throw new UnauthorizedException();
+
+    const user = await this.authService.validateUserByToken(token);
+    if (!user) throw new UnauthorizedException();
+    return user;
   }
 }
