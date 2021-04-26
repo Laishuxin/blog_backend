@@ -3,9 +3,8 @@ import { insert, query } from 'src/database';
 import { UserAuthDefault } from '.';
 import CreateUserDto from './dto/CreateUserDto';
 import { UserDaoFields, UserDao } from './dao/user.dao';
-import { User } from './class/User';
+import { User } from './class/user';
 import { ServiceCode, IServiceResponse } from '..';
-import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class UserService {

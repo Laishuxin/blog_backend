@@ -15,6 +15,7 @@ export default class UserLoginDto {
     maxLength: 32,
     required: true,
     example: 'U2FsdGVkX19zc3PzPGowl13j2ama6q0bgzJhNOajT1U=',
+    examples: ['U2FsdGVkX193/+6A+Trmm02hKLrxMuX9Z1gInoKLvxI=']
   })
   readonly password: string;
 }

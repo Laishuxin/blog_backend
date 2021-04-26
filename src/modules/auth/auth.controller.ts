@@ -13,7 +13,7 @@ import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { decrypt } from 'src/utils/crypto_util';
 import { ServiceCode } from '..';
-import { User, UserSchema } from '../user/class/User';
+import { User, UserSchema } from '../user/class/user';
 import UserLoginDto from '../user/dto/UserLoginDto';
 import { AuthService } from './auth.service';
 import ValidateTokenDto from './dto/ValidateTokenDto';
@@ -31,7 +31,7 @@ export class AuthController {
     status: 200,
     type: UserSchema,
   })
-  @Post('login')
+  @Post('account')
   public async userLogin(
     @Body() userLoginDto: UserLoginDto,
     @Res() req: Response<{ data: User; token: string }>,

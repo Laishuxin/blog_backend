@@ -5,7 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { validate } from 'src/utils/crypto_util';
 import { IServiceResponse, ServiceCode } from '..';
 import { UserAuthEnum } from '../user';
-import { User } from '../user/class/User';
+import { User } from '../user/class/user';
 import UserLoginDto from '../user/dto/UserLoginDto';
 import { UserService } from '../user/user.service';
 import { Payload } from './jwt.strategy';

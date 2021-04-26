@@ -19,7 +19,7 @@ export class RoleGuard implements CanActivate {
     const role = this.reflector.get<UserAuthEnum>('role', context.getHandler());
 
     if (role === UserAuthEnum.ADMIN) {
-      let token = ctx.headers['authorization'];
+      let token = ctx.headers['Authorization'] as string;
       // lacks token.
       if (!token) return false;
 

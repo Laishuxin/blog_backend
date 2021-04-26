@@ -10,10 +10,7 @@ import {
   NotFoundException,
   Param,
   Post,
-  Query,
-  Req,
   Res,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -29,7 +26,7 @@ import {
 import { Request, Response } from 'express';
 import { UserAuthEnum } from '.';
 import { ServiceCode } from '..';
-import { User } from './class/User';
+import { User } from './class/user';
 import CreateUserDto from './dto/CreateUserDto';
 import { Role } from './role.decorator';
 import { RoleGuard } from './role.guard';
@@ -56,7 +53,7 @@ export class UserController {
     name: 'username',
     type: String,
   })
-  @Get('get/:username')
+  @Get('detail/:username')
   @Role(UserAuthEnum.ADMIN)
   @UseGuards(RoleGuard)
   async getUserByUsername(
