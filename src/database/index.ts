@@ -1,5 +1,5 @@
 import db from '../../config/database';
-import { Sequelize, QueryTypes, QueryOptionsWithType } from 'sequelize';
+import { Sequelize, QueryTypes } from 'sequelize';
 import { getLogger } from 'src/utils/logger';
 import { loggingDb } from 'src/utils/logging_util';
 
@@ -67,7 +67,12 @@ sequelize
 
 export async function query<T = any>(
   sql: string,
-  { logging = false, raw = true, convertBuffer = true } = {},
+  {
+    logging = false,
+    raw = true,
+    convertBuffer = true,
+    convertToBoolean = true,
+  } = {},
 ): Promise<T[]> {
   try {
     const result = (await sequelize.query(sql, {
@@ -76,13 +81,14 @@ export async function query<T = any>(
       raw,
     })) as any;
     if (Array.isArray(result) && convertBuffer) {
-      result.forEach(item => {
+      result.forEach((item) => {
         for (let i in item) {
           if (Buffer.isBuffer(item[i])) {
-            item[i] = item[i][0]
+            const v = item[i][0];
+            item[i] = convertToBoolean ? !!v : v;
           }
         }
-      })
+      });
     }
     return Promise.resolve(result);
   } catch (err) {

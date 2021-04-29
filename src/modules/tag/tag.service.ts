@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { query } from 'src/database';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 
@@ -15,8 +16,14 @@ export class TagService {
   findOne(id: number) {
     return `This action returns a #${id} tag`;
   }
-  
-  findByArticleId(articleId: string) {}
+
+  async findByArticleId(articleId: number) {
+    const sql = `SELECT name FROM t_tag 
+    INNER JOIN t_article_tag ON t_tag.tag_id = t_article_tag.tag_id 
+    WHERE article_id = ${articleId}`;
+    const result = await query(sql)
+    return result.map(item => item.name)
+  }
 
   update(id: number, updateTagDto: UpdateTagDto) {
     return `This action updates a #${id} tag`;

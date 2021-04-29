@@ -73,20 +73,27 @@ LIMIT ${offset}, ${limit};`;
 
   // TODO(rushui 2021-04-26): fill with
   private async getUser(userId: string): Promise<User | null> {
-    return null;
+    const user = await this.userService.findOneByUserId(userId);
+    const result = user.data ? UserService.getUser(user.data) : null;
+    return result;
   }
 
   private async getCategory(categoryId: number): Promise<string | null> {
-    return '';
+    if (!categoryId) return null;
+    return this.categoryService.findOneById(categoryId);
   }
 
   private async getTagsByArticleId(
     articleId: number,
   ): Promise<string[] | null> {
-    return [''];
+    if (articleId === undefined || articleId === null) return [];
+
+    const tags = await this.tagService.findByArticleId(articleId);
+    return tags;
   }
 
   private async mapData(articleDaoList: ArticleDao[]): Promise<ArticleItem[]> {
+    // TODO(rushui 2021-04-26): delete log
     const result: ArticleItem[] = [];
     for (let i = 0, len = articleDaoList.length; i < len; i++) {
       const item = articleDaoList[i];

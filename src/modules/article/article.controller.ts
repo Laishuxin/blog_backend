@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ArticleService } from './article.service';
 import { CreateArticleDto } from './dto/create-article.dto';
@@ -15,21 +24,17 @@ export class ArticleController {
   }
 
   @Get('list')
-  @ApiQuery(
-    {
-      name: 'offset',
-      required: false,
-    }
-  )
+  @ApiQuery({ name: 'offset', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({name: 'sortKey', required: false})
+  @ApiQuery({name:'isAsc', required: false})
   findMany(
     @Query('offset') offset: number = 0,
     @Query('limit') limit: number = 10,
     @Query('sortKey') sortKey = 'update_at',
     @Query('isAsc') isAsc: number = 0,
   ) {
-    return this.articleService.findMany(
-      offset, limit, sortKey, !!isAsc
-    );
+    return this.articleService.findMany(offset, limit, sortKey, !!isAsc);
   }
 
   @Get('item/:id')

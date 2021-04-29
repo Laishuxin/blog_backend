@@ -1,8 +1,10 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 
+@ApiTags('comment')
 @Controller('comment')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
@@ -18,8 +20,8 @@ export class CommentController {
   }
 
   @Get('item/:articleId')
-  findOne(@Param('id') id: string) {
-    return this.commentService.findOne(+id);
+  findByArticleId(@Param('articleId') articleId: number) {
+    return this.commentService.findByArticleId(articleId);
   }
 
   @Patch('item/:articleId')

@@ -1,4 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { query } from 'src/database';
+import { IServiceResponse } from '..';
+import { CategoryDaoFields } from './dao/category.dao';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
@@ -12,8 +15,14 @@ export class CategoryService {
     return `This action returns all category`;
   }
 
-  findOneById(id: number) {
-    return `This action returns a #${id} category`;
+  public async findOneById(
+    id: number,
+    // ): Promise<IServiceResponse<string | null>> {
+  ) {
+    const name = CategoryDaoFields.name;
+    const sql = `SELECT ${name} FROM t_category WHERE ${CategoryDaoFields.categoryId}=${id}`;
+    const result = await query(sql);
+    return result.length > 0 ? result[0][name] : null;
   }
 
   update(id: number, updateCategoryDto: UpdateCategoryDto) {
