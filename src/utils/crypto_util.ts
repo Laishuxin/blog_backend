@@ -1,7 +1,7 @@
 /* src/utils/cryptogram.ts */
 // import CryptoJS from 'crypto-js';
 import * as crypto from 'crypto';
-import * as CryptoJS from 'crypto-js'
+import * as CryptoJS from 'crypto-js';
 
 // TODO(rushui 2021-04-17): .env
 const secretKey = 'aFF23abe9Dca11ebb1fd';
